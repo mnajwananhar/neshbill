@@ -1,8 +1,13 @@
+import Image from "next/image";
+
 export default function MenuItem() {
   return (
     <div className="border p-5 bg-white-200  rounded-lg text-center hover:bg-gray-200 hover:shadow-md hover:shadow-black/25 transition-all">
       <div className="text-center">
-        <img
+        <Image
+          width={100}
+          height={100}
+          s
           src="/whitePaperBag.png"
           className="max-h-auto max-h-29 block mx-auto"
           alt="Paper"
