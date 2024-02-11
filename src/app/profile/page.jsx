@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 export default function ProfilePage() {
   const session = useSession();
   const [userName, setUserName] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { status } = session;
 
   useEffect(() => {
@@ -16,6 +18,8 @@ export default function ProfilePage() {
   }, [session, status]);
   async function handleProfileInfoUpdate(e) {
     e.preventDefault();
+    setSaved(false);
+    setIsSaving(true);
     const response = await fetch("/api/profile", {
       method: "PUT",
       headers: {
@@ -23,6 +27,21 @@ export default function ProfilePage() {
       },
       body: JSON.stringify({ name: userName }),
     });
+    setIsSaving(false);
+    if (response.ok) {
+      setSaved(true);
+    }
+  }
+  async function handleFileChange(e) {
+    const files = e.target.files;
+    if (files?.length === 1) {
+      const data = new FormData();
+      data.set("file ", files[0]);
+      await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+    }
   }
 
   if (status === "loading") {
@@ -35,8 +54,19 @@ export default function ProfilePage() {
   const userImage = session.data?.user?.image;
   return (
     <section className="mt-8">
-      <h1 className="text-center text-primary text-4xl mb-4 ">Profile Page</h1>
+      <h1 className="text-center text-primary text-4xl mb-4 ">Profile</h1>
+
       <div className="max-w-md mx-auto">
+        {saved && (
+          <h2 className="text-center bg-green-200 p-4 border border-green-300 rounded-lg ">
+            Profile saved!
+          </h2>
+        )}
+        {isSaving && (
+          <h2 className="text-center bg-blue-200 p-4 border border-blue-300 rounded-lg ">
+            Saving...
+          </h2>
+        )}
         <div className="flex gap-4 items-center">
           <div>
             <div className="p-2 rounded-lg relative">
@@ -48,7 +78,16 @@ export default function ProfilePage() {
                 height={200}
               />
 
-              <button type="submit">Edit</button>
+              <label>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <span className="border border-x-gray-300 cursor-pointer rounded-lg p-2 block text-center">
+                  Edit
+                </span>
+              </label>
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
