@@ -16,9 +16,13 @@ export async function PUT(req) {
   if ("image" in data) {
     update.image = data.image;
   }
+  if ("city" in data) {
+    update.image = data.image;
+  }
+
   if (Object.keys(update).length > 0) {
     //update user name
-    await User.updateOne({ email }, update);
+    await User.updateOne({ email }, data);
   }
 
   return Response.json(true);

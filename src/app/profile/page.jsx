@@ -1,16 +1,22 @@
 "use client";
+import { rejects } from "assert";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { resolve } from "path";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function ProfilePage() {
   const session = useSession();
   console.log(session);
   const [userName, setUserName] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [image, setImage] = useState("");
+  const [phone, setPhone] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
   const { status } = session;
 
   useEffect(() => {
@@ -21,19 +27,31 @@ export default function ProfilePage() {
   }, [session, status]);
   async function handleProfileInfoUpdate(e) {
     e.preventDefault();
-    setSaved(false);
-    setIsSaving(true);
-    const response = await fetch("/api/profile", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: userName, image }),
+
+    const savingPromise = new Promise(async (resolve, reject) => {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: userName,
+          image,
+          streetAddress,
+          phone,
+          postalCode,
+          city,
+          country,
+        }),
+      });
+      if (response.ok) resolve();
+      else reject();
     });
-    setIsSaving(false);
-    if (response.ok) {
-      setSaved(true);
-    }
+    await toast.promise(savingPromise, {
+      loading: "Saving...",
+      success: "Profile Saved!",
+      error: "Error !",
+    });
   }
 
   async function handleFileChange(e) {
@@ -41,12 +59,24 @@ export default function ProfilePage() {
     if (files.length === 1) {
       const data = new FormData();
       data.set("file", files[0]);
-      const response = await fetch("/api/upload", {
+
+      const uploadPromise = fetch("/api/upload", {
         method: "POST",
         body: data,
+      }).then((response) => {
+        if (response.ok) {
+          return response.json().then((link) => {
+            setImage(link);
+          });
+        }
+        throw new Error("Something went wrong");
       });
-      const link = await response.json();
-      setImage(link);
+
+      await toast.promise(uploadPromise, {
+        loading: "Uploading...",
+        success: "Upload Complete!",
+        error: "Upload Error !",
+      });
     }
   }
 
@@ -62,17 +92,7 @@ export default function ProfilePage() {
       <h1 className="text-center text-primary text-4xl mb-4 ">Profile</h1>
 
       <div className="max-w-md mx-auto">
-        {saved && (
-          <h2 className="text-center bg-green-200 p-4 border border-green-300 rounded-lg ">
-            Profile saved!
-          </h2>
-        )}
-        {isSaving && (
-          <h2 className="text-center bg-blue-200 p-4 border border-blue-300 rounded-lg ">
-            Saving...
-          </h2>
-        )}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 ">
           <div>
             <div className="p-2 rounded-lg relative  max-w-[120px]">
               {image && (
@@ -109,6 +129,38 @@ export default function ProfilePage() {
               placeholder="Email"
               value={session.data?.user?.email}
               disabled={true}
+            />
+            <input
+              type="tel"
+              placeholder="Phone Number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Street Address"
+              value={streetAddress}
+              onChange={(e) => setStreetAddress(e.target.value)}
+            />
+            <div className="flex gap-4">
+              <input
+                type="text"
+                placeholder="City"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Postal Code"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
             />
             <button type="submit">Save</button>
           </form>
