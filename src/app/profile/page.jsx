@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const session = useSession();
+  console.log(session);
   const [userName, setUserName] = useState("");
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -27,7 +28,7 @@ export default function ProfilePage() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: userName }),
+      body: JSON.stringify({ name: userName, image }),
     });
     setIsSaving(false);
     if (response.ok) {
