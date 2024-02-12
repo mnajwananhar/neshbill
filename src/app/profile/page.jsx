@@ -9,11 +9,13 @@ export default function ProfilePage() {
   const [userName, setUserName] = useState("");
   const [saved, setSaved] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [image, setImage] = useState("");
   const { status } = session;
 
   useEffect(() => {
     if (status === "authenticated") {
       setUserName(session.data.user.name);
+      setImage(session.data.user.image);
     }
   }, [session, status]);
   async function handleProfileInfoUpdate(e) {
@@ -38,10 +40,12 @@ export default function ProfilePage() {
     if (files.length === 1) {
       const data = new FormData();
       data.set("file", files[0]);
-      await fetch("/api/upload", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         body: data,
       });
+      const link = await response.json();
+      setImage(link);
     }
   }
 
@@ -52,7 +56,6 @@ export default function ProfilePage() {
     return redirect("/login");
   }
 
-  const userImage = session.data?.user?.image;
   return (
     <section className="mt-8">
       <h1 className="text-center text-primary text-4xl mb-4 ">Profile</h1>
@@ -70,14 +73,16 @@ export default function ProfilePage() {
         )}
         <div className="flex gap-4 items-center">
           <div>
-            <div className="p-2 rounded-lg relative">
-              <Image
-                className="rounded-lg w-full h-full mb-1"
-                src={userImage}
-                alt={""}
-                width={200}
-                height={200}
-              />
+            <div className="p-2 rounded-lg relative  max-w-[120px]">
+              {image && (
+                <Image
+                  className="rounded-lg w-full h-full mb-1"
+                  src={image}
+                  alt={""}
+                  width={200}
+                  height={200}
+                />
+              )}
 
               <label>
                 <input
