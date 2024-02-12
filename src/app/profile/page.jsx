@@ -23,6 +23,15 @@ export default function ProfilePage() {
     if (status === "authenticated") {
       setUserName(session.data.user.name);
       setImage(session.data.user.image);
+      fetch("/api/profile").then((response) => {
+        response.json().then((data) => {
+          setPhone(data.phone);
+          setStreetAddress(data.streetAddress);
+          setPostalCode(data.postalCode);
+          setCity(data.city);
+          setCountry(data.phone);
+        });
+      });
     }
   }, [session, status]);
   async function handleProfileInfoUpdate(e) {
@@ -118,44 +127,58 @@ export default function ProfilePage() {
             </div>
           </div>
           <form className="grow" onSubmit={handleProfileInfoUpdate}>
+            <label htmlFor="">First and last name</label>
             <input
               type="text"
               placeholder="First and last name"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
             />
+            <label htmlFor="">Email</label>
+
             <input
               type="email"
               placeholder="Email"
               value={session.data?.user?.email}
               disabled={true}
             />
+            <label htmlFor="">Phone number</label>
+
             <input
               type="tel"
               placeholder="Phone Number"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
             />
+            <label htmlFor="">Street Address</label>
             <input
               type="text"
               placeholder="Street Address"
               value={streetAddress}
               onChange={(e) => setStreetAddress(e.target.value)}
             />
+
             <div className="flex gap-4">
-              <input
-                type="text"
-                placeholder="City"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Postal Code"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-              />
+              <div>
+                <label htmlFor="">City</label>
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </div>
+              <div>
+                <label htmlFor="">Postal Code</label>
+                <input
+                  type="text"
+                  placeholder="Postal Code"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                />
+              </div>
             </div>
+            <label htmlFor="">Country</label>
             <input
               type="text"
               placeholder="Country"
