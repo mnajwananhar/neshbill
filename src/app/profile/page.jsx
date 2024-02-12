@@ -32,11 +32,12 @@ export default function ProfilePage() {
       setSaved(true);
     }
   }
+
   async function handleFileChange(e) {
     const files = e.target.files;
-    if (files?.length === 1) {
+    if (files.length === 1) {
       const data = new FormData();
-      data.set("file ", files[0]);
+      data.set("file", files[0]);
       await fetch("/api/upload", {
         method: "POST",
         body: data,
